@@ -13,6 +13,8 @@ import com.mrjaffesclass.apcs.messages.*;
 public class Controller implements MessageMailbox {
 
   private final Messaging mvcMessaging;
+  private View view;
+  private Model model;
 
   /**
    * Controller constructor The Controller is responsible for creating the View
@@ -35,13 +37,15 @@ public class Controller implements MessageMailbox {
     mvcMessaging = new Messaging();
 
     // Create the view and set it visible
-    View view = new View(mvcMessaging);    // This creates our view
+    view = new View(mvcMessaging);    // This creates our view
     view.init();
     view.setVisible(true);
 
     // Create the model
-    Model model = new Model(mvcMessaging);  // This creates our model
+    model = new Model(mvcMessaging);  // This creates our model
     model.init();
+    
+    // Add some sample to do items to the model
   }
 
   /**
@@ -51,9 +55,8 @@ public class Controller implements MessageMailbox {
    * "this" refers to this controller object.
    */
   public void init() {
-    mvcMessaging.subscribe("view:toggleButtonClick", this);
-    mvcMessaging.subscribe("view:buttonClick", this); 
-    mvcMessaging.subscribe("view:changeButton", this);
+//    mvcMessaging.subscribe("view:toggleButtonClick", this);
+    addSampleItems();
   }
 
   @Override
@@ -64,6 +67,22 @@ public class Controller implements MessageMailbox {
       System.out.println("RCV (controller): "+messageName+" | "+messagePayload.toString());
     } else {
       System.out.println("RCV (controller): "+messageName+" | No data sent");
+    }
+  }
+  
+   /**
+   * Add some initial items to our to do list
+   */
+  public void addSampleItems() {
+    String[] initialData = {
+      "Do APCS project", 
+      "Finish English paper", 
+      "Proofread resume",
+      "Get gas in the car",
+      "Deposit paycheck"
+    };
+    for (String description : initialData) {
+      model.add (description);
     }
   }
 
