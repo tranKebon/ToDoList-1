@@ -1,5 +1,6 @@
 package com.mrjaffesclass.apcs.todolist;
 import java.util.*;
+import javax.swing.table.*;
 import com.mrjaffesclass.apcs.messages.*;
 /**
  * MVC Template
@@ -11,6 +12,10 @@ import com.mrjaffesclass.apcs.messages.*;
  */
 public class View extends javax.swing.JFrame implements MessageMailbox {
 
+  private final int ID_FIELD = 0;
+  private final int COMPLETED_FIELD = 1;
+  private final int DESCRIPTION_FIELD = 2;
+  
   private final Messaging mvcMessaging;
   
   /**
@@ -20,6 +25,12 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
   public View(Messaging messages) {
     mvcMessaging = messages;   // Save the calling controller instance
     initComponents();           // Create and init the GUI components
+    
+    // Make adjustments to the column widths to suit our needs
+    // Remove the ID column
+    jTable1.getColumnModel().getColumn(COMPLETED_FIELD).setPreferredWidth(75);  // Set width of checkbox column
+    jTable1.getColumnModel().getColumn(DESCRIPTION_FIELD).setPreferredWidth(475);  // Set width of checkbox column
+    jTable1.removeColumn(jTable1.getColumnModel().getColumn(ID_FIELD));  // Remove the ID column from the table
   }
   
   /**
@@ -28,12 +39,25 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
    */
   public void init() {
     // Subscribe to messages here
-    mvcMessaging.subscribe("model:variable1Changed", this);
-    mvcMessaging.subscribe("model:variable2Changed", this);
+    mvcMessaging.subscribe("controller:items", this);
   }
   
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
+    switch (messageName) {
+      case "controller:items":
+        ArrayList ar = (ArrayList)messagePayload;
+        DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
+        tableModel.setRowCount(ar.size());
+        for (int i=0; i<ar.size(); i++) {
+          ToDoItem item = (ToDoItem)(ar.get(i));
+          tableModel.setValueAt(item.getId(), i, ID_FIELD);
+          tableModel.setValueAt(item.isCompleted(), i, COMPLETED_FIELD);
+          tableModel.setValueAt(item.getDescription(), i, DESCRIPTION_FIELD);
+        }
+        break;
+    }
+
     if (messagePayload != null) {
       System.out.println("RCV (view): "+messageName+" | "+messagePayload.toString());
     } else {
@@ -52,20 +76,31 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
 
     jScrollPane2 = new javax.swing.JScrollPane();
     jTable1 = new javax.swing.JTable();
+    jButton1 = new javax.swing.JButton();
+    jButton2 = new javax.swing.JButton();
+    jButton3 = new javax.swing.JButton();
+    jButton4 = new javax.swing.JButton();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
     jTable1.setModel(new javax.swing.table.DefaultTableModel(
       new Object [][] {
-        {null, null, null, null},
-        {null, null, null, null},
-        {null, null, null, null},
-        {null, null, null, null}
+
       },
       new String [] {
-        "Title 1", "Title 2", "Title 3", "Title 4"
+        "id", "Complete", "Description"
       }
-    ));
+    ) {
+      Class[] types = new Class [] {
+        java.lang.Integer.class, java.lang.Boolean.class, java.lang.String.class
+      };
+
+      public Class getColumnClass(int columnIndex) {
+        return types [columnIndex];
+      }
+    });
+    jTable1.getTableHeader().setResizingAllowed(false);
+    jTable1.getTableHeader().setReorderingAllowed(false);
     jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
       public void mouseClicked(java.awt.event.MouseEvent evt) {
         jTable1MouseClicked(evt);
@@ -73,20 +108,49 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
     });
     jScrollPane2.setViewportView(jTable1);
 
+    jButton1.setText("New");
+
+    jButton2.setText("Edit");
+
+    jButton3.setText("Delete");
+    jButton3.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton3ActionPerformed(evt);
+      }
+    });
+
+    jButton4.setText("About...");
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(163, Short.MAX_VALUE))
+        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(152, 152, 152)
+        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
+      .addComponent(jScrollPane2)
     );
+
+    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton1, jButton2, jButton3});
+
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-        .addGap(0, 85, Short.MAX_VALUE)
-        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 342, javax.swing.GroupLayout.PREFERRED_SIZE))
+      .addGroup(layout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(jButton1)
+          .addComponent(jButton2)
+          .addComponent(jButton3)
+          .addComponent(jButton4))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
+        .addContainerGap())
     );
 
     pack();
@@ -96,11 +160,19 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
     // TODO add your handling code here:
   }//GEN-LAST:event_jTable1MouseClicked
 
+  private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    // TODO add your handling code here:
+  }//GEN-LAST:event_jButton3ActionPerformed
+
   /**
    * @param args the command line arguments
    */
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton jButton1;
+  private javax.swing.JButton jButton2;
+  private javax.swing.JButton jButton3;
+  private javax.swing.JButton jButton4;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JTable jTable1;
   // End of variables declaration//GEN-END:variables

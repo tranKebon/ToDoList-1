@@ -1,5 +1,6 @@
 package com.mrjaffesclass.apcs.todolist;
 
+import com.mrjaffesclass.apcs.todolist.MessageClasses.*;
 import java.util.*;
 import com.mrjaffesclass.apcs.messages.*;
 
@@ -12,9 +13,9 @@ public class Model implements MessageMailbox {
 
   // Instance variables
   private final Messaging mvcMessaging;
-  private ArrayList<ToDoItem> toDoList;   // This contains our to do list items
+  private final ArrayList<ToDoItem> toDoList;   // This contains our to do list items
   private int nextId = 0;                 // This will tell us what the id of 
-                                          // the next item entered should be
+                                          // the next item added should be
   
   /**
    * Model constructor: Create the data representation of the program
@@ -28,28 +29,42 @@ public class Model implements MessageMailbox {
   
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
-    switch (messageName) {
-      case "controller:getItems":
-        mvcMessaging.notify("model:items", this.getItems());
-        break;
-      case "controller:getItem":
-        mvcMessaging.notify("model:item", this.getItem((int)messagePayload));
-        break;
-      case "controller:setItemCompleted":
-        this.setComplete((int)messagePayload);
-        mvcMessaging.notify("model:itemCompleted", messagePayload);
-        break;
-      case "controller:setItemDescription":
-        ChangeDescriptionMessage msg = (ChangeDescriptionMessage)messagePayload;
-        this.changeDescription(msg.getId(), msg.getDescription());
-        mvcMessaging.notify("model:itemCompleted", messagePayload);
-        break;
-    }
     // Print debug messages to the console. Remove these when our app is working
     if (messagePayload != null) {
       System.out.println("RCV (model): "+messageName+" | "+messagePayload.toString());
     } else {
       System.out.println("RCV (model): "+messageName+" | No data sent");
+    }
+
+    // Handle the message
+    switch (messageName) {
+      // Controller has asked for the list of to do items
+      // Send back the items
+      case "controller:getItems":
+        mvcMessaging.notify("model:items", this.getItems(), true);
+        break;
+        
+      // Controller has asked for an individual item
+      // Find the item and send it back
+      case "controller:getItem":
+        mvcMessaging.notify("model:item", this.getItem((int)messagePayload), true);
+        break;
+        
+      // Controller has asked that an item be marked as completed
+      // Set the complete flag in the item
+      // and notify that it was done
+      case "controller:setItemCompleted":
+        this.setComplete((int)messagePayload);
+        mvcMessaging.notify("model:itemCompleted", messagePayload, true);
+        break;
+        
+      // Controller has asked that the description of an item be changed
+      // Change the description and notify that it was done
+      case "controller:setItemDescription":
+        ChangeDescriptionMessage msg = (ChangeDescriptionMessage)messagePayload;
+        this.changeDescription(msg.getId(), msg.getDescription());
+        mvcMessaging.notify("model:itemDescription", messagePayload, true);
+        break;
     }
   }
 
@@ -59,7 +74,10 @@ public class Model implements MessageMailbox {
    * 
    */
   public void init() {
-    mvcMessaging.subscribe("controller:changeButton", this);
+    mvcMessaging.subscribe("controller:getItems", this);
+    mvcMessaging.subscribe("controller:getItem", this);
+    mvcMessaging.subscribe("controller:setItemCompleted", this);
+    mvcMessaging.subscribe("controller:setItemDescription", this);
   }
 
   /** 

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package com.mrjaffesclass.apcs.todolist;
+package com.mrjaffesclass.apcs.todolist.MessageClasses;
 
 /**
  *

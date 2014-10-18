@@ -1,5 +1,6 @@
 package com.mrjaffesclass.apcs.todolist;
 
+import com.mrjaffesclass.apcs.todolist.MessageClasses.ChangeDescriptionMessage;
 import com.mrjaffesclass.apcs.messages.*;
 import java.util.ArrayList;
 
@@ -17,6 +18,7 @@ import static org.junit.Assert.*;
  */
 public class ModelTest {
   
+  public Messaging messaging;
   public Model model;
   public String[] initialData = {
     "Do APCS project", 
@@ -40,7 +42,9 @@ public class ModelTest {
   
   @Before
   public void setUp() {
-    model = new Model(new Messaging());
+    messaging = new Messaging();
+    model = new Model(messaging);
+    model.init();
     model = this.addSampleItems(model);
     
     this.testArrayList = new ArrayList<>();
@@ -180,11 +184,27 @@ public class ModelTest {
     assertEquals("testChangeDescription", "This is a new description", item.getDescription());
   }
   
-   /**
-   * Add some initial items to our to do list
-   * @param model Model under test
-   * @return Model returned
+  /**
+   * Test of controller:getItems message, of class Model.
    */
+  @Test
+  public void testMessages() {
+    messaging.notify("controller:getItems", null, true);
+    messaging.notify("controller:getItem", 3, true);
+
+    messaging.notify("controller:setItemCompleted", 1, true);
+    assertTrue("controller:setItemCompleted", model.getItem(1).isCompleted());
+    
+    ChangeDescriptionMessage m = new ChangeDescriptionMessage(0, "New description");
+    messaging.notify("controller:setItemDescription", m, true);
+    assertEquals("controller:setItemDescription", "New description", model.getItem(0).getDescription());
+  }
+  
+  /**
+  * Add some initial items to our to do list
+  * @param model Model under test
+  * @return Model returned
+  */
   public Model addSampleItems(Model model) {
     for (String description : initialData) {
       model.add (description);

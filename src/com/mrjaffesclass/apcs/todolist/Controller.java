@@ -1,4 +1,5 @@
 package com.mrjaffesclass.apcs.todolist;
+import com.mrjaffesclass.apcs.todolist.MessageClasses.*;
 import com.mrjaffesclass.apcs.messages.*;
 
 /**
@@ -43,9 +44,7 @@ public class Controller implements MessageMailbox {
 
     // Create the model
     model = new Model(mvcMessaging);  // This creates our model
-    model.init();
-    
-    // Add some sample to do items to the model
+    model.init();    
   }
 
   /**
@@ -57,10 +56,18 @@ public class Controller implements MessageMailbox {
   public void init() {
 //    mvcMessaging.subscribe("view:toggleButtonClick", this);
     addSampleItems();
+    mvcMessaging.subscribe("model:items", this);
+
+    mvcMessaging.notify("controller:getItems");
   }
 
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
+    switch (messageName) {
+      case "model:items":
+        mvcMessaging.notify("controller:items", messagePayload, true);
+        break;     
+    }
 
     // Debug messages here -- we can remove them when our app is working properly
     if (messagePayload != null) {
@@ -77,9 +84,10 @@ public class Controller implements MessageMailbox {
     String[] initialData = {
       "Do APCS project", 
       "Finish English paper", 
+      "This is a very long to do item that has to be done soon!",
       "Proofread resume",
       "Get gas in the car",
-      "Deposit paycheck"
+      "Deposit paycheck",
     };
     for (String description : initialData) {
       model.add (description);
