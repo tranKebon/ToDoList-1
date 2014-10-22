@@ -3,18 +3,22 @@ import java.util.*;
 import javax.swing.table.*;
 import com.mrjaffesclass.apcs.messages.*;
 /**
- * MVC Template
- * This is a template of an MVC framework used by APCS for the 
- * LandMine project (and others)
+ * To do list main view
  * @author Roger Jaffe
  * @version 1.0
  * 
  */
-public class View extends javax.swing.JFrame implements MessageMailbox {
+public class MainView extends javax.swing.JFrame implements MessageMailbox {
 
   private final int ID_FIELD = 0;
-  private final int COMPLETED_FIELD = 1;
+  private final int DONE_FIELD = 1;
   private final int DESCRIPTION_FIELD = 2;
+  
+  private final int DONE_FIELD_WIDTH = 75;
+  private final int DESCRIPTION_FIELD_WIDTH = 475;
+  
+  private final int X_POSITION = 100;
+  private final int Y_POSITION = 100;
   
   private final Messaging mvcMessaging;
   
@@ -22,14 +26,15 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
    * Creates a new view
    * @param messages mvcMessaging object
    */
-  public View(Messaging messages) {
+  public MainView(Messaging messages) {
     mvcMessaging = messages;   // Save the calling controller instance
+    this.setLocation(X_POSITION, Y_POSITION);
     initComponents();           // Create and init the GUI components
     
     // Make adjustments to the column widths to suit our needs
     // Remove the ID column
-    jTable1.getColumnModel().getColumn(COMPLETED_FIELD).setPreferredWidth(75);  // Set width of checkbox column
-    jTable1.getColumnModel().getColumn(DESCRIPTION_FIELD).setPreferredWidth(475);  // Set width of checkbox column
+    jTable1.getColumnModel().getColumn(DONE_FIELD).setPreferredWidth(DONE_FIELD_WIDTH);  // Set width of checkbox column
+    jTable1.getColumnModel().getColumn(DESCRIPTION_FIELD).setPreferredWidth(DESCRIPTION_FIELD_WIDTH);  // Set width of checkbox column
     jTable1.removeColumn(jTable1.getColumnModel().getColumn(ID_FIELD));  // Remove the ID column from the table
   }
   
@@ -39,32 +44,80 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
    */
   public void init() {
     // Subscribe to messages here
-    mvcMessaging.subscribe("controller:items", this);
+    mvcMessaging.subscribe("appController:ready", this);
+    mvcMessaging.subscribe("appModel:items", this);
   }
   
+  // Handle the messages from the appController, appModel and views
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
     switch (messageName) {
-      case "controller:items":
-        ArrayList ar = (ArrayList)messagePayload;
-        DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
-        tableModel.setRowCount(ar.size());
-        for (int i=0; i<ar.size(); i++) {
-          ToDoItem item = (ToDoItem)(ar.get(i));
-          tableModel.setValueAt(item.getId(), i, ID_FIELD);
-          tableModel.setValueAt(item.isCompleted(), i, COMPLETED_FIELD);
-          tableModel.setValueAt(item.getDescription(), i, DESCRIPTION_FIELD);
-        }
+      // The app is loaded and ready to go
+      case "appController:ready":
+        // Ask for the to do list items
+        mvcMessaging.notify("getItems", null, true);
         break;
-    }
-
-    if (messagePayload != null) {
-      System.out.println("RCV (view): "+messageName+" | "+messagePayload.toString());
-    } else {
-      System.out.println("RCV (view): "+messageName+" | No data sent");
+        
+      // The model is sending a list of to do items
+      case "appModel:items":
+        ArrayList list = (ArrayList)messagePayload;
+        DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
+        loadTableModel(tableModel, list);
+        break;
     }
   }
 
+  /**
+   * Loads the to do list into the tableModel to display in the table
+   * @param tableModel  TableModel for jTable
+   * @param list        To do list of items
+   */
+  private void loadTableModel(DefaultTableModel tableModel, ArrayList list) {
+    int size = list.size();
+    tableModel.setRowCount(size);
+    for (int i=0; i<size; i++) {
+      ToDoItem item = (ToDoItem)(list.get(i));
+      tableModel.setValueAt(item.getId(), i, ID_FIELD);
+      tableModel.setValueAt(item.isDone(), i, DONE_FIELD);
+      tableModel.setValueAt(item.getDescription(), i, DESCRIPTION_FIELD);
+    }
+  }
+  
+  /**
+   * Creates a ToDoItem from the data in the table model
+   */
+  private ToDoItem createItemFromTableModelRow(int row) {
+    DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
+    
+    // Now create a ToDoItem that we can pass to the editing dialog
+    // The done field is toggled when the user clicks the checkbox
+    ToDoItem item = new ToDoItem(              
+      (int)tableModel.getValueAt(row, ID_FIELD),
+      (String)tableModel.getValueAt(row, DESCRIPTION_FIELD),
+      (boolean)tableModel.getValueAt(row, DONE_FIELD)
+    );
+    return item;
+  }
+  
+  /**
+   * Light up the edit item dialog
+   * @param item Item to edit
+   */
+  private void editItem(ToDoItem item) {
+    EditView dialog = new EditView(this, item, mvcMessaging);
+    dialog.init();
+    dialog.setVisible(true);
+  }
+  
+  /**
+   * User clicked the completed check box. Don't show edit dialog
+   * because the done field is toggled by clicking the check box
+   * @param item Item to edit
+   */
+  private void toggleDone(ToDoItem item) {
+    mvcMessaging.notify("editItem:saveItem", item, true);
+  }
+  
   /**
    * This method is called from within the constructor to initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is always
@@ -76,9 +129,7 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
 
     jScrollPane2 = new javax.swing.JScrollPane();
     jTable1 = new javax.swing.JTable();
-    jButton1 = new javax.swing.JButton();
-    jButton2 = new javax.swing.JButton();
-    jButton3 = new javax.swing.JButton();
+    newItemBtn = new javax.swing.JButton();
     jButton4 = new javax.swing.JButton();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -108,14 +159,10 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
     });
     jScrollPane2.setViewportView(jTable1);
 
-    jButton1.setText("New");
-
-    jButton2.setText("Edit");
-
-    jButton3.setText("Delete");
-    jButton3.addActionListener(new java.awt.event.ActionListener() {
+    newItemBtn.setText("New");
+    newItemBtn.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButton3ActionPerformed(evt);
+        newItemBtnActionPerformed(evt);
       }
     });
 
@@ -126,27 +173,17 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
-        .addContainerGap()
-        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(152, 152, 152)
+        .addComponent(newItemBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(310, 310, 310)
         .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
       .addComponent(jScrollPane2)
     );
-
-    layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButton1, jButton2, jButton3});
-
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(jButton1)
-          .addComponent(jButton2)
-          .addComponent(jButton3)
+          .addComponent(newItemBtn)
           .addComponent(jButton4))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
@@ -157,23 +194,32 @@ public class View extends javax.swing.JFrame implements MessageMailbox {
   }// </editor-fold>//GEN-END:initComponents
 
   private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
-    // TODO add your handling code here:
+    // Get the clicked item data
+    // Get the row number that was clicked in the table
+    // then find the item id of the clicked item
+    int row = jTable1.getSelectedRow(); 
+    int col = jTable1.getSelectedColumn();
+    ToDoItem item = this.createItemFromTableModelRow(row);
+    if (col == ID_FIELD) {
+      toggleDone(item);
+    } else {
+      editItem(item);
+    }
   }//GEN-LAST:event_jTable1MouseClicked
 
-  private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-    // TODO add your handling code here:
-  }//GEN-LAST:event_jButton3ActionPerformed
+  private void newItemBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newItemBtnActionPerformed
+    ToDoItem item = new ToDoItem(-1, "New to do item", false);
+    editItem(item);
+  }//GEN-LAST:event_newItemBtnActionPerformed
 
   /**
    * @param args the command line arguments
    */
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton jButton1;
-  private javax.swing.JButton jButton2;
-  private javax.swing.JButton jButton3;
   private javax.swing.JButton jButton4;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JTable jTable1;
+  private javax.swing.JButton newItemBtn;
   // End of variables declaration//GEN-END:variables
 }

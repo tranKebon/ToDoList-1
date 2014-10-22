@@ -12,14 +12,14 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Unit test for the Model class
+ * Unit test for the AppModel class
  * @author Roger Jaffe
  * @version 1.0
  */
-public class ModelTest {
+public class AppModelTest {
   
   public Messaging messaging;
-  public Model model;
+  public AppModel model;
   public String[] initialData = {
     "Do APCS project", 
     "Finish English paper", 
@@ -29,7 +29,7 @@ public class ModelTest {
   };
   public ArrayList<ToDoItem> testArrayList;
   
-  public ModelTest() {
+  public AppModelTest() {
   }
   
   @BeforeClass
@@ -43,7 +43,7 @@ public class ModelTest {
   @Before
   public void setUp() {
     messaging = new Messaging();
-    model = new Model(messaging);
+    model = new AppModel(messaging);
     model.init();
     model = this.addSampleItems(model);
     
@@ -58,7 +58,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of messageHandler method, of class Model.
+   * Test of messageHandler method, of class AppModel.
    */
   @Test
   public void testMessageHandler() {
@@ -66,7 +66,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of init method, of class Model.
+   * Test of init method, of class AppModel.
    */
   @Test
   public void testInit() {
@@ -74,7 +74,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of getItem method, of class Model.
+   * Test of getItem method, of class AppModel.
    */
   @Test
   public void testGetItem() {
@@ -83,7 +83,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of getItems method, of class Model.
+   * Test of getItems method, of class AppModel.
    */
   @Test
   public void testGetItems() {
@@ -92,7 +92,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of add method, of class Model.
+   * Test of add method, of class AppModel.
    */
   @Test
   public void testAdd1() {
@@ -112,7 +112,7 @@ public class ModelTest {
   
 
   /**
-   * Test of delete method, of class Model.
+   * Test of delete method, of class AppModel.
    */
   @Test
   public void testDelete1() {
@@ -122,7 +122,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of delete method, of class Model.
+   * Test of delete method, of class AppModel.
    */
   @Test
   public void testDelete2() {
@@ -132,7 +132,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of setComplete method, of class Model.
+   * Test of setComplete method, of class AppModel.
    */
   @Test
   public void testSetCompleteCheckItem() {
@@ -142,7 +142,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of setComplete method, of class Model.
+   * Test of setComplete method, of class AppModel.
    */
   @Test
   public void testSetCompleteCheckOtherItemUnchanged() {
@@ -152,7 +152,7 @@ public class ModelTest {
   }
 
   /**
-   * Test of setNotComplete method, of class Model.
+   * Test of setNotComplete method, of class AppModel.
    */
   @Test
   public void testSetNotCompleteCheckItem() {
@@ -163,7 +163,7 @@ public class ModelTest {
  }
 
   /**
-   * Test of setNotComplete method, of class Model.
+   * Test of setNotComplete method, of class AppModel.
    */
   @Test
   public void testSetNotCompleteCheckOtherItemUnchanged() {
@@ -175,7 +175,7 @@ public class ModelTest {
  }
 
   /**
-   * Test of changeDescription method, of class Model.
+   * Test of changeDescription method, of class AppModel.
    */
   @Test
   public void testChangeDescription() {
@@ -185,7 +185,7 @@ public class ModelTest {
   }
   
   /**
-   * Test of controller:getItems message, of class Model.
+   * Test of controller:getItems message, of class AppModel.
    */
   @Test
   public void testMessages() {
@@ -202,10 +202,10 @@ public class ModelTest {
   
   /**
   * Add some initial items to our to do list
-  * @param model Model under test
-  * @return Model returned
+  * @param model AppModel under test
+  * @return AppModel returned
   */
-  public Model addSampleItems(Model model) {
+  public AppModel addSampleItems(AppModel model) {
     for (String description : initialData) {
       model.add (description);
     }

@@ -12,7 +12,7 @@ package com.mrjaffesclass.apcs.todolist;
  */
 public class ToDoItem {
 
-  private final int id;  // id can't be changed
+  private int id;  // id can't be changed
   private String description;
   private boolean done;
   
@@ -20,6 +20,12 @@ public class ToDoItem {
     description = _description;
     id = _id;
     done = false;     // Default to not completed
+  }
+
+  public ToDoItem(int _id, String _description, boolean _done) {
+    description = _description;
+    id = _id;
+    done = _done;     // Default to not completed
   }
 
   public String getDescription() {
@@ -30,20 +36,29 @@ public class ToDoItem {
     this.description = description;
   }
 
-  public boolean isCompleted() {
+  public boolean isDone() {
     return done;
   }
 
-  public void completed() {
-    this.done = true;
+  public void setDone(boolean done) {
+    this.done = done;
   }
   
-  public void notCompleted() {
-    this.done = false;
+  public void toggleDone() {
+    this.done = !this.done;
   }
 
   public int getId() {
     return id;
+  }
+  
+  public void setId(int id) {
+    this.id = id;
+  }
+  
+  public void merge(ToDoItem anotherItem) {
+    this.setDescription(anotherItem.getDescription());
+    this.setDone(anotherItem.isDone());    
   }
 
 }
