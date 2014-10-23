@@ -1,14 +1,14 @@
 package com.mrjaffesclass.apcs.todolist;
 import java.util.*;
 import javax.swing.table.*;
-import com.mrjaffesclass.apcs.messages.*;
+import com.mrjaffesclass.apcs.messenger.*;
 /**
  * To do list main view
  * @author Roger Jaffe
  * @version 1.0
  * 
  */
-public class MainView extends javax.swing.JFrame implements MessageMailbox {
+public class MainView extends javax.swing.JFrame implements MessageHandler {
 
   private final int ID_FIELD = 0;
   private final int DONE_FIELD = 1;
@@ -20,14 +20,14 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
   private final int X_POSITION = 100;
   private final int Y_POSITION = 100;
   
-  private final Messaging mvcMessaging;
+  private final Messenger messenger;
   
   /**
    * Creates a new view
-   * @param messages mvcMessaging object
+   * @param _messenger mvcMessaging object
    */
-  public MainView(Messaging messages) {
-    mvcMessaging = messages;   // Save the calling controller instance
+  public MainView(Messenger _messenger) {
+    messenger = _messenger;   // Save the calling controller instance
     this.setLocation(X_POSITION, Y_POSITION);
     initComponents();           // Create and init the GUI components
     
@@ -44,8 +44,8 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
    */
   public void init() {
     // Subscribe to messages here
-    mvcMessaging.subscribe("appController:ready", this);
-    mvcMessaging.subscribe("appModel:items", this);
+    messenger.subscribe("ready", this);
+    messenger.subscribe("items", this);
   }
   
   // Handle the messages from the appController, appModel and views
@@ -53,13 +53,13 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
   public void messageHandler(String messageName, Object messagePayload) {
     switch (messageName) {
       // The app is loaded and ready to go
-      case "appController:ready":
+      case "ready":
         // Ask for the to do list items
-        mvcMessaging.notify("getItems", null, true);
+        messenger.notify("getItems", null, true);
         break;
         
       // The model is sending a list of to do items
-      case "appModel:items":
+      case "items":
         ArrayList list = (ArrayList)messagePayload;
         DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
         loadTableModel(tableModel, list);
@@ -104,7 +104,7 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
    * @param item Item to edit
    */
   private void editItem(ToDoItem item) {
-    EditView dialog = new EditView(this, item, mvcMessaging);
+    EditView dialog = new EditView(this, item, messenger);
     dialog.init();
     dialog.setVisible(true);
   }
@@ -115,7 +115,7 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
    * @param item Item to edit
    */
   private void toggleDone(ToDoItem item) {
-    mvcMessaging.notify("editItem:saveItem", item, true);
+    messenger.notify("saveItem", item, true);
   }
   
   /**
@@ -131,6 +131,7 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
     jTable1 = new javax.swing.JTable();
     newItemBtn = new javax.swing.JButton();
     jButton4 = new javax.swing.JButton();
+    jButton1 = new javax.swing.JButton();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -168,13 +169,22 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
 
     jButton4.setText("About...");
 
+    jButton1.setText("Remove completed items");
+    jButton1.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        jButton1ActionPerformed(evt);
+      }
+    });
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
     getContentPane().setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(layout.createSequentialGroup()
         .addComponent(newItemBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(310, 310, 310)
+        .addGap(38, 38, 38)
+        .addComponent(jButton1)
+        .addGap(175, 175, 175)
         .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
       .addComponent(jScrollPane2)
     );
@@ -184,7 +194,8 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(newItemBtn)
-          .addComponent(jButton4))
+          .addComponent(jButton4)
+          .addComponent(jButton1))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
         .addContainerGap())
@@ -212,11 +223,16 @@ public class MainView extends javax.swing.JFrame implements MessageMailbox {
     editItem(item);
   }//GEN-LAST:event_newItemBtnActionPerformed
 
+  private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    messenger.notify("removeCompletedItems");
+  }//GEN-LAST:event_jButton1ActionPerformed
+
   /**
    * @param args the command line arguments
    */
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton jButton1;
   private javax.swing.JButton jButton4;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JTable jTable1;

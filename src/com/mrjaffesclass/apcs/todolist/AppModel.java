@@ -1,18 +1,18 @@
 package com.mrjaffesclass.apcs.todolist;
 
 import java.util.*;
-import com.mrjaffesclass.apcs.messages.*;
+import com.mrjaffesclass.apcs.messenger.*;
 
 /**
  * The model represents the data that the app uses.
  * @author Roger Jaffe
  * @version 1.0
  */
-public class AppModel implements MessageMailbox {
+public class AppModel implements MessageHandler {
 
   // Instance variables
   // ***** MOVE THIS INTO THE MESSAGEMAILBOX CLASS!!
-  private final Messaging mvcMessaging;
+  private final Messenger messenger;
   // List of to do items
   private final ArrayList<ToDoItem> toDoList;   
   // Keeps track of the next item's ID number
@@ -20,11 +20,11 @@ public class AppModel implements MessageMailbox {
   
   /**
    * Model constructor: Create the data representation of the program
-   * @param messages Messaging class instantiated by the Controller for 
+   * @param _messenger Messaging class instantiated by the Controller for 
    *   local messages between Model, View, and controller
    */
-  public AppModel(Messaging messages) {
-    mvcMessaging = messages;
+  public AppModel(Messenger _messenger) {
+    messenger = _messenger;
     // We start with an empty list
     toDoList = new ArrayList<>();
   }
@@ -39,26 +39,31 @@ public class AppModel implements MessageMailbox {
       // View has asked for the list of to do items
       // Send back the items
       case "getItems":
-        mvcMessaging.notify("appModel:items", this.getItems(), true);
+        messenger.notify("items", this.getItems(), true);
         break;
         
       // Controller has asked for an individual item
       // Find the item and send it back
       case "getItem":
-        mvcMessaging.notify("appModel:item", this.getItem((int)messagePayload), true);
+        messenger.notify("item", this.getItem((int)messagePayload), true);
         break;
         
-      case "editItem:saveItem":
+      case "saveItem":
         putItem(item);
-        mvcMessaging.notify("appModel:saved", null, true);
-        mvcMessaging.notify("appModel:items", this.getItems(), true);
+        messenger.notify("saved", null, true);
+        messenger.notify("items", this.getItems(), true);
         break;
         
-      case "editItem:deleteItem":
+      case "deleteItem":
         this.deleteItem(item);
-        mvcMessaging.notify("appModel:saved", null, true);
-        mvcMessaging.notify("appModel:items", this.getItems(), true);
+        messenger.notify("saved", null, true);
+        messenger.notify("items", this.getItems(), true);
         break;
+        
+      case "removeCompletedItems":
+        removeCompletedItems();
+        messenger.notify("saved");
+        messenger.notify("items", this.getItems());
     }
   }
 
@@ -68,10 +73,11 @@ public class AppModel implements MessageMailbox {
    * 
    */
   public void init() {
-    mvcMessaging.subscribe("getItems", this);
-    mvcMessaging.subscribe("getItem", this);
-    mvcMessaging.subscribe("editItem:saveItem", this);
-    mvcMessaging.subscribe("editItem:deleteItem", this);
+    messenger.subscribe("getItems", this);
+    messenger.subscribe("getItem", this);
+    messenger.subscribe("saveItem", this);
+    messenger.subscribe("deleteItem", this);
+    messenger.subscribe("removeCompletedItems", this);
   }
 
   /** 
@@ -134,7 +140,7 @@ public class AppModel implements MessageMailbox {
    */
   public boolean deleteItem(int id) {
     ToDoItem item = find(id);
-    return deleteItem(item);
+    return toDoList.remove(item);
   }
 
   /**
@@ -143,6 +149,22 @@ public class AppModel implements MessageMailbox {
    * @return true if the item was found and removed
    */
   public boolean deleteItem(ToDoItem item) {
-    return toDoList.remove(item);
+    return deleteItem(item.getId());
+  }
+  
+  /**
+   * Removes all completed items from the to do list
+   */
+  public void removeCompletedItems() {
+    ArrayList<ToDoItem> newList = new ArrayList<>();
+    for (ToDoItem item : toDoList) {
+      if (!item.isDone()) {
+        newList.add(item);
+      }
+    }
+    toDoList.clear();
+    for (ToDoItem item : newList) {
+      toDoList.add(item);
+    }
   }
 }

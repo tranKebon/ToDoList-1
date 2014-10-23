@@ -1,5 +1,5 @@
 package com.mrjaffesclass.apcs.todolist;
-import com.mrjaffesclass.apcs.messages.*;
+import com.mrjaffesclass.apcs.messenger.*;
 
 /**
  * 
@@ -10,9 +10,9 @@ import com.mrjaffesclass.apcs.messages.*;
  * @author Roger Jaffe
  * @version 1.0
  */
-public class AppController implements MessageMailbox {
+public class AppController implements MessageHandler {
 
-  private final Messaging mvcMessaging;
+  private final Messenger messenger;
   private final MainView view;
   private final AppModel appModel;
 
@@ -26,15 +26,15 @@ public class AppController implements MessageMailbox {
    */
   public AppController() {
     // Create the local messaging class
-    mvcMessaging = new Messaging();
+    messenger = new Messenger();
 
     // Create the view and set it visible
-    view = new MainView(mvcMessaging);   
+    view = new MainView(messenger);   
     view.init();
     view.setVisible(true);
 
     // Create the model
-    appModel = new AppModel(mvcMessaging);  
+    appModel = new AppModel(messenger);  
     appModel.init();    
   }
 
@@ -44,7 +44,7 @@ public class AppController implements MessageMailbox {
    */
   public void init() {
     addSampleItems();
-    mvcMessaging.notify("ready");
+    messenger.notify("ready");
   }
 
   @Override

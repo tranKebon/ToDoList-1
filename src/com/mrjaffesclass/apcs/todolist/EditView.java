@@ -1,5 +1,5 @@
 package com.mrjaffesclass.apcs.todolist;
-import com.mrjaffesclass.apcs.messages.*;
+import com.mrjaffesclass.apcs.messenger.*;
 
 /**
  * View for editing to do items
@@ -7,11 +7,11 @@ import com.mrjaffesclass.apcs.messages.*;
  * @author Roger
  * @version 1.0
  */
-public class EditView extends javax.swing.JDialog implements MessageMailbox {
+public class EditView extends javax.swing.JDialog implements MessageHandler {
 
   ToDoItem item;
   String s;
-  Messaging mvcMessaging;
+  Messenger messenger;
 
   /**
    * Creates new form to edit the to do item
@@ -20,10 +20,10 @@ public class EditView extends javax.swing.JDialog implements MessageMailbox {
    * @param _item     The to do item to edit 
    * @param messages  Messaging class
    */
-  public EditView(java.awt.Frame parent, ToDoItem _item, Messaging messages) {
+  public EditView(java.awt.Frame parent, ToDoItem _item, Messenger _messenger) {
     super(parent, true);
     item = _item;
-    mvcMessaging = messages;
+    messenger = _messenger;
     this.setLocationRelativeTo(parent);
     initComponents();
     setValues();
@@ -32,7 +32,7 @@ public class EditView extends javax.swing.JDialog implements MessageMailbox {
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
     // Data was saved... close the edit dialog
-    if (messageName.equals("appModel:saved")) {
+    if (messageName.equals("saved")) {
       cancelBtnActionPerformed(null);
     }
   }
@@ -41,7 +41,7 @@ public class EditView extends javax.swing.JDialog implements MessageMailbox {
    * Initialize the view after object is constructed
    */
   public void init() {
-    mvcMessaging.subscribe("appModel:saved", this);    
+    messenger.subscribe("saved", this);    
   }
   
   /**
@@ -68,11 +68,11 @@ public class EditView extends javax.swing.JDialog implements MessageMailbox {
     getValues();
     switch (action) {
       case "save":
-        mvcMessaging.notify("editItem:saveItem", item, true);
+        messenger.notify("saveItem", item, true);
         break;
         
       case "delete":
-        mvcMessaging.notify("editItem:deleteItem", item, true);
+        messenger.notify("deleteItem", item, true);
         break;
     }
   }
