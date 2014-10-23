@@ -1,7 +1,7 @@
 ToDoList
 ========
 
-##### To do list for APCS. Students will add a date to the "to do" item
+##### To do list for APCS. Students will add a date field to the "to do" items
 
 ##### The program should add the following functionality
 
