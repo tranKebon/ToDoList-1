@@ -21,7 +21,8 @@ ToDoList
 Tutorial at <http://davidwburns.wordpress.com/2012/06/19/add-jxdatepicker-to-the-netbeans-swing-controls-palette/>
 
 Netbeans datepicker component can be found at this file path: 
-This Computer / Windows 8OS (C:) / Program Files / Netbeans 8.0 / ide / modeuls / ext / swingx_all_#.#.#.jar
+
+This Computer / Windows 8OS (C:) / Program Files / Netbeans 8.0 / ide / modules / ext / swingx_all_#.#.#.jar
 
 ----------
 
