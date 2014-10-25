@@ -1,4 +1,5 @@
 package com.mrjaffesclass.apcs.todolist;
+
 import java.util.*;
 import javax.swing.table.*;
 import com.mrjaffesclass.apcs.messenger.*;
@@ -10,45 +11,50 @@ import com.mrjaffesclass.apcs.messenger.*;
  */
 public class MainView extends javax.swing.JFrame implements MessageHandler {
 
+  // Instance constants
   private final int ID_FIELD = 0;
   private final int DONE_FIELD = 1;
   private final int DESCRIPTION_FIELD = 2;
   
-  private final int DONE_FIELD_WIDTH = 75;
+  private final int DONE_FIELD_WIDTH = 65;
   private final int DESCRIPTION_FIELD_WIDTH = 475;
+  private final int ROW_HEIGHT = 25;
   
   private final int X_POSITION = 100;
   private final int Y_POSITION = 100;
   
+  // Messenger class gets saved here
   private final Messenger messenger;
   
   /**
-   * Creates a new view
+   * Creates a new main view
    * @param _messenger mvcMessaging object
    */
   public MainView(Messenger _messenger) {
     messenger = _messenger;   // Save the calling controller instance
-    this.setLocation(X_POSITION, Y_POSITION);
+    this.setLocation(X_POSITION, Y_POSITION); // Set main window location
     initComponents();           // Create and init the GUI components
     
     // Make adjustments to the column widths to suit our needs
-    // Remove the ID column
+    // Remove the ID column and set the row height
     jTable1.getColumnModel().getColumn(DONE_FIELD).setPreferredWidth(DONE_FIELD_WIDTH);  // Set width of checkbox column
     jTable1.getColumnModel().getColumn(DESCRIPTION_FIELD).setPreferredWidth(DESCRIPTION_FIELD_WIDTH);  // Set width of checkbox column
     jTable1.removeColumn(jTable1.getColumnModel().getColumn(ID_FIELD));  // Remove the ID column from the table
+    jTable1.setRowHeight(ROW_HEIGHT);
   }
   
   /**
-   * Initialize the model here and subscribe
-   * to any required messages
+   * Do any required initialization code and subscribe
+   * to messages to which the view needs to respond
    */
   public void init() {
-    // Subscribe to messages here
     messenger.subscribe("ready", this);
     messenger.subscribe("items", this);
   }
   
-  // Handle the messages from the appController, appModel and views
+  // This method implements the messageHandler method defined in
+  // the MessageHandler interface and will fire when a message 
+  // that this module has subscribed to is sent
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
     switch (messageName) {
@@ -58,7 +64,8 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
         messenger.notify("getItems", null, true);
         break;
         
-      // The model is sending a list of to do items
+      // The message contains the list of to do items in messagePayload
+      // The tableModel has the data that's displayed in the table. 
       case "items":
         ArrayList list = (ArrayList)messagePayload;
         DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
@@ -69,35 +76,27 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
 
   /**
    * Loads the to do list into the tableModel to display in the table
-   * @param tableModel  TableModel for jTable
+   * If we put the to do list's data in the table model the view will
+   * paint the table with the table model's data.
+   * @param tableModel  TableModel for the jTable
    * @param list        To do list of items
    */
   private void loadTableModel(DefaultTableModel tableModel, ArrayList list) {
+    // Get the number of items in the list and
+    // set the tableModel with this size
     int size = list.size();
     tableModel.setRowCount(size);
+    
+    // Look through the to do list and save the to do item fields
+    // in the table model.  The table model will see the changes
+    // and cause the table to repaint with the new data
     for (int i=0; i<size; i++) {
       ToDoItem item = (ToDoItem)(list.get(i));
       tableModel.setValueAt(item.getId(), i, ID_FIELD);
       tableModel.setValueAt(item.isDone(), i, DONE_FIELD);
       tableModel.setValueAt(item.getDescription(), i, DESCRIPTION_FIELD);
     }
-  }
-  
-  /**
-   * Creates a ToDoItem from the data in the table model
-   */
-  private ToDoItem createItemFromTableModelRow(int row) {
-    DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
-    
-    // Now create a ToDoItem that we can pass to the editing dialog
-    // The done field is toggled when the user clicks the checkbox
-    ToDoItem item = new ToDoItem(              
-      (int)tableModel.getValueAt(row, ID_FIELD),
-      (String)tableModel.getValueAt(row, DESCRIPTION_FIELD),
-      (boolean)tableModel.getValueAt(row, DONE_FIELD)
-    );
-    return item;
-  }
+}
   
   /**
    * Light up the edit item dialog
@@ -119,6 +118,22 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
   }
   
   /**
+   * Creates a ToDoItem from the data in the table model
+   */
+  private ToDoItem createItemFromTableModelRow(int row) {
+    DefaultTableModel tableModel = (DefaultTableModel)jTable1.getModel();
+    
+    // Now create a ToDoItem that we can pass to the editing dialog
+    // The done field is toggled when the user clicks the checkbox
+    ToDoItem item = new ToDoItem(              
+      (int)tableModel.getValueAt(row, ID_FIELD),
+      (String)tableModel.getValueAt(row, DESCRIPTION_FIELD),
+      (boolean)tableModel.getValueAt(row, DONE_FIELD)
+    );
+    return item;
+  }
+  
+  /**
    * This method is called from within the constructor to initialize the form.
    * WARNING: Do NOT modify this code. The content of this method is always
    * regenerated by the Form Editor.
@@ -130,8 +145,8 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     jScrollPane2 = new javax.swing.JScrollPane();
     jTable1 = new javax.swing.JTable();
     newItemBtn = new javax.swing.JButton();
-    jButton4 = new javax.swing.JButton();
-    jButton1 = new javax.swing.JButton();
+    aboutBtn = new javax.swing.JButton();
+    removeCompleteItemsBtn = new javax.swing.JButton();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -167,12 +182,17 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
       }
     });
 
-    jButton4.setText("About...");
-
-    jButton1.setText("Remove completed items");
-    jButton1.addActionListener(new java.awt.event.ActionListener() {
+    aboutBtn.setText("About...");
+    aboutBtn.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        jButton1ActionPerformed(evt);
+        aboutBtnActionPerformed(evt);
+      }
+    });
+
+    removeCompleteItemsBtn.setText("Remove completed items");
+    removeCompleteItemsBtn.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        removeCompleteItemsBtnActionPerformed(evt);
       }
     });
 
@@ -183,9 +203,9 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
       .addGroup(layout.createSequentialGroup()
         .addComponent(newItemBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addGap(38, 38, 38)
-        .addComponent(jButton1)
+        .addComponent(removeCompleteItemsBtn)
         .addGap(175, 175, 175)
-        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addComponent(aboutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
       .addComponent(jScrollPane2)
     );
     layout.setVerticalGroup(
@@ -194,8 +214,8 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
         .addContainerGap()
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(newItemBtn)
-          .addComponent(jButton4)
-          .addComponent(jButton1))
+          .addComponent(aboutBtn)
+          .addComponent(removeCompleteItemsBtn))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
         .addContainerGap())
@@ -211,6 +231,10 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     int row = jTable1.getSelectedRow(); 
     int col = jTable1.getSelectedColumn();
     ToDoItem item = this.createItemFromTableModelRow(row);
+    
+    // If the checkbox column was clicked, then we can just toggle the item's
+    // done field.  If any other column was clicked we should open the editItem
+    // dialog so the item can be edited.
     if (col == ID_FIELD) {
       toggleDone(item);
     } else {
@@ -223,19 +247,24 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     editItem(item);
   }//GEN-LAST:event_newItemBtnActionPerformed
 
-  private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+  private void removeCompleteItemsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeCompleteItemsBtnActionPerformed
     messenger.notify("removeCompletedItems");
-  }//GEN-LAST:event_jButton1ActionPerformed
+  }//GEN-LAST:event_removeCompleteItemsBtnActionPerformed
+
+  private void aboutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutBtnActionPerformed
+    AboutView dialog = new AboutView(this, true);
+    dialog.setVisible(true);
+  }//GEN-LAST:event_aboutBtnActionPerformed
 
   /**
    * @param args the command line arguments
    */
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton jButton1;
-  private javax.swing.JButton jButton4;
+  private javax.swing.JButton aboutBtn;
   private javax.swing.JScrollPane jScrollPane2;
   private javax.swing.JTable jTable1;
   private javax.swing.JButton newItemBtn;
+  private javax.swing.JButton removeCompleteItemsBtn;
   // End of variables declaration//GEN-END:variables
 }

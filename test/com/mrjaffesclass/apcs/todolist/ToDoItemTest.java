@@ -35,6 +35,37 @@ public class ToDoItemTest {
   }
 
   /**
+   * Test of first constructor
+   */
+  @Test
+  public void testToDoItem1() {
+    ToDoItem item = new ToDoItem(-1, "Test description");
+    assertEquals("getDescription", "Test description", item.getDescription());
+    assertEquals("getId", -1, item.getId());
+    assertFalse("getDone", item.isDone());
+  }
+
+  /**
+   * Test of second constructor
+   */
+  @Test
+  public void testToDoItem2() {
+    ToDoItem item = new ToDoItem(-1, "Test description 2", true);
+    assertEquals("getDescription", "Test description 2", item.getDescription());
+    assertEquals("getId", -1, item.getId());
+    assertTrue("getDone", item.isDone());
+  }
+
+  /**
+   * Test of getId method, of class ToDoItem.
+   */
+  @Test
+  public void testGetId() {
+    ToDoItem item = new ToDoItem(22, "Test description");
+    assertEquals("getId", 22, item.getId());
+  }
+
+  /**
    * Test of getDescription method, of class ToDoItem.
    */
   @Test
@@ -54,33 +85,36 @@ public class ToDoItemTest {
   }
 
   /**
-   * Test of isDone method, of class ToDoItem.
-   */
-  @Test
-  public void testNotCompleted() {
-    ToDoItem item = new ToDoItem(2, "Test description");
-    item.completed();
-    item.notCompleted();
-    assertFalse("notCompleted", item.isCompleted());
-  }
-
-  /**
    * Test of setDone method, of class ToDoItem.
    */
   @Test
-  public void testCompleted() {
+  public void testIsDone() {
     ToDoItem item = new ToDoItem(2, "Test description");
-    item.completed();
-    assertTrue("completed", item.isCompleted());
+    assertFalse("isDone", item.isDone());
+  }
+  
+  /**
+   * Test of isDone method, of class ToDoItem.
+   */
+  @Test
+  public void testSetDone() {
+    ToDoItem item = new ToDoItem(2, "Test description");
+    item.setDone(true);
+    assertTrue("setDone set done to true", item.isDone());
+    item.setDone(false);
+    assertFalse("setDone set done to false", item.isDone());
   }
 
   /**
-   * Test of getId method, of class ToDoItem.
+   * Test of toggleDone method
    */
   @Test
-  public void testGetId() {
-    ToDoItem item = new ToDoItem(22, "Test description");
-    assertEquals("getId", 22, item.getId());
+  public void testToggleDone() {
+    ToDoItem item = new ToDoItem(2, "Test description", true);
+    item.toggleDone();
+    assertFalse("setDone set done to false", item.isDone());
+    item.toggleDone();
+    assertTrue("setDone set done to true", item.isDone());
   }
 
 }

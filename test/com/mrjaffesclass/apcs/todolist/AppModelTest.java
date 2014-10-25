@@ -1,7 +1,6 @@
 package com.mrjaffesclass.apcs.todolist;
 
-import com.mrjaffesclass.apcs.todolist.MessageClasses.ChangeDescriptionMessage;
-import com.mrjaffesclass.apcs.messages.*;
+import com.mrjaffesclass.apcs.messenger.*;
 import java.util.ArrayList;
 
 import org.junit.After;
@@ -18,7 +17,7 @@ import static org.junit.Assert.*;
  */
 public class AppModelTest {
   
-  public Messaging messaging;
+  public Messenger messenger;
   public AppModel model;
   public String[] initialData = {
     "Do APCS project", 
@@ -42,14 +41,14 @@ public class AppModelTest {
   
   @Before
   public void setUp() {
-    messaging = new Messaging();
-    model = new AppModel(messaging);
+    messenger = new Messenger();
+    model = new AppModel(messenger);
     model.init();
     model = this.addSampleItems(model);
     
     this.testArrayList = new ArrayList<>();
     for (int i=0; i<initialData.length; i++) {
-      testArrayList.add(new ToDoItem(i, initialData[i]));
+      testArrayList.add(new ToDoItem(-1, initialData[i]));
     }
   }
   
@@ -92,22 +91,25 @@ public class AppModelTest {
   }
 
   /**
-   * Test of add method, of class AppModel.
+   * Test of putItem method for new ToDoItem
    */
   @Test
-  public void testAdd1() {
-    ToDoItem newItem = model.add("This is added item 1");
-    assertEquals("testAdd1: Item returned", "This is added item 1", newItem.getDescription());
+  public void testPutItem1() {
+    ToDoItem newItem = new ToDoItem(-1, "This is added item 1");
+    ToDoItem addedItem = model.putItem(newItem);
+    assertEquals("testPutItem1: Item returned", addedItem, newItem);
+    assertEquals("testPutItem1: Item description", "This is added item 1", newItem.getDescription());
   }
   
   /** 
-   * Test of add method on found new item
+   * Test of putItem method for edited existing ToDoItem
    */
   @Test
-  public void testAdd2() {
-    ToDoItem newItem = model.add("This is added item 2");
-    newItem = model.getItem(newItem.getId());
-    assertEquals("testAdd2: Item returned", "This is added item 2", newItem.getDescription());
+  public void testPutItem2() {
+    ToDoItem item;
+    ToDoItem newItem = model.putItem(new ToDoItem(-1, "This is item 1"));
+    newItem = model.putItem(new ToDoItem(-1, "This is item 2"));
+    assertEquals("testPutItem2: Item count = 2", 7, model.getItems().size());
   }
   
 
@@ -116,9 +118,9 @@ public class AppModelTest {
    */
   @Test
   public void testDelete1() {
-    boolean removed = model.delete(1);
+    assertTrue("testDelete1a: deleteItem returned true", model.deleteItem(1));
     ToDoItem newItem = model.getItem(1);
-    assertNull("testDelete: Item removed", newItem);
+    assertNull("testDelete1b: Item removed", newItem);
   }
 
   /**
@@ -126,78 +128,26 @@ public class AppModelTest {
    */
   @Test
   public void testDelete2() {
-    boolean removed = model.delete(1);
-    int size = model.getItems().size();
-    assertEquals("testDelete: Correct size of list", 4, size);
-  }
-
-  /**
-   * Test of setComplete method, of class AppModel.
-   */
-  @Test
-  public void testSetCompleteCheckItem() {
-    model.setComplete(2);
-    ToDoItem item = model.getItem(2);
-    assertTrue("testSetCompleteCheckItem: Set item as completed", item.isCompleted());
-  }
-
-  /**
-   * Test of setComplete method, of class AppModel.
-   */
-  @Test
-  public void testSetCompleteCheckOtherItemUnchanged() {
-    model.setComplete(2);
-    ToDoItem item = model.getItem(3);
-    assertFalse("testSetCompleteCheckOtherItemUnchanged: No change to another item", item.isCompleted());
-  }
-
-  /**
-   * Test of setNotComplete method, of class AppModel.
-   */
-  @Test
-  public void testSetNotCompleteCheckItem() {
-    model.setComplete(2);
-    model.setNotComplete(2);
-    ToDoItem item = model.getItem(2);
-    assertFalse("testSetNotCompleteCheckItem", item.isCompleted());
- }
-
-  /**
-   * Test of setNotComplete method, of class AppModel.
-   */
-  @Test
-  public void testSetNotCompleteCheckOtherItemUnchanged() {
-    model.setComplete(3);
-    model.setComplete(2);
-    model.setNotComplete(2);
-    ToDoItem item = model.getItem(3);
-    assertTrue("testSetNotCompleteCheckOtherItemUnchanged", item.isCompleted());
- }
-
-  /**
-   * Test of changeDescription method, of class AppModel.
-   */
-  @Test
-  public void testChangeDescription() {
-    model.changeDescription(1, "This is a new description");
     ToDoItem item = model.getItem(1);
-    assertEquals("testChangeDescription", "This is a new description", item.getDescription());
+    assertTrue("testDelete2a: deleteItem returned true", model.deleteItem(item));
+    assertEquals("testDelete2b: Correct size of list", 4, model.getItems().size());
+    assertNull("testDelete2c: Item deleted", model.getItem(1));
   }
-  
+
+  /**
+   * Test of delete method, of class AppModel.
+   */
+  @Test
+  public void testDelete3() {
+    assertFalse("testDelete3: item not found", model.deleteItem(8));
+  }
+
   /**
    * Test of controller:getItems message, of class AppModel.
    */
   @Test
   public void testMessages() {
-    messaging.notify("controller:getItems", null, true);
-    messaging.notify("controller:getItem", 3, true);
-
-    messaging.notify("controller:setItemCompleted", 1, true);
-    assertTrue("controller:setItemCompleted", model.getItem(1).isCompleted());
-    
-    ChangeDescriptionMessage m = new ChangeDescriptionMessage(0, "New description");
-    messaging.notify("controller:setItemDescription", m, true);
-    assertEquals("controller:setItemDescription", "New description", model.getItem(0).getDescription());
+    assertTrue("testMessages", true);
   }
   
   /**
@@ -207,7 +157,7 @@ public class AppModelTest {
   */
   public AppModel addSampleItems(AppModel model) {
     for (String description : initialData) {
-      model.add (description);
+      model.putItem (new ToDoItem(-1, description));
     }
     return model;
   }

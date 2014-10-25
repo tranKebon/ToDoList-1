@@ -4,34 +4,39 @@ import com.mrjaffesclass.apcs.messenger.*;
 /**
  * View for editing to do items
  * 
- * @author Roger
+ * @author Roger Jaffe
  * @version 1.0
  */
 public class EditView extends javax.swing.JDialog implements MessageHandler {
 
+  // Instance variables
+  //  item:       The item being edited
+  //  messenger:  The messenger object
   ToDoItem item;
-  String s;
   Messenger messenger;
 
   /**
    * Creates new form to edit the to do item
    * 
-   * @param parent    The main window
-   * @param _item     The to do item to edit 
-   * @param messages  Messaging class
+   * @param parent      The main window
+   * @param _item       The to do item to edit 
+   * @param _messenger  Messenger class
    */
   public EditView(java.awt.Frame parent, ToDoItem _item, Messenger _messenger) {
     super(parent, true);
     item = _item;
     messenger = _messenger;
-    this.setLocationRelativeTo(parent);
+    this.setLocationRelativeTo(parent); // Set window location near the main window
     initComponents();
-    setValues();
+    setFieldValues();
   }
   
+  // This method implements the messageHandler method defined in
+  // the MessageHandler interface
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
-    // Data was saved... close the edit dialog
+    // Received confirmation message that data was processed... 
+    // close the edit dialog
     if (messageName.equals("saved")) {
       cancelBtnActionPerformed(null);
     }
@@ -47,13 +52,13 @@ public class EditView extends javax.swing.JDialog implements MessageHandler {
   /**
    * Initialize the values in the edit fields
    */
-  private void setValues() {
+  private void setFieldValues() {
     descriptionText.setText(item.getDescription());
     completedCheckBox.setSelected(item.isDone());
   }
   
   /**
-   * Save editing fields into item
+   * Get editing fields from form and save in the item
    */
   private void getValues() {
     item.setDescription(descriptionText.getText());

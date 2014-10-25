@@ -9,13 +9,13 @@ import com.mrjaffesclass.apcs.messenger.*;
  * @version 1.0
  */
 public class AppModel implements MessageHandler {
-
   // Instance variables
-  // ***** MOVE THIS INTO THE MESSAGEMAILBOX CLASS!!
+  // messenger:   The Messenger object that handles messaging between classes
+  // toDoList:    Keeps the list of to do items
+  // nextId:      Keeps track of the ID that should be given to the next 
+  //              ToDoItem that's added to the list
   private final Messenger messenger;
-  // List of to do items
   private final ArrayList<ToDoItem> toDoList;   
-  // Keeps track of the next item's ID number
   private int nextId = 0;                 
   
   /**
@@ -25,48 +25,9 @@ public class AppModel implements MessageHandler {
    */
   public AppModel(Messenger _messenger) {
     messenger = _messenger;
-    // We start with an empty list
-    toDoList = new ArrayList<>();
+    toDoList = new ArrayList<>();   // We start with an empty list
   }
   
-  @Override
-  public void messageHandler(String messageName, Object messagePayload) {
-    // Grab the to do item
-    ToDoItem item = (ToDoItem)messagePayload;
-    
-    // Process the message
-    switch (messageName) {
-      // View has asked for the list of to do items
-      // Send back the items
-      case "getItems":
-        messenger.notify("items", this.getItems(), true);
-        break;
-        
-      // Controller has asked for an individual item
-      // Find the item and send it back
-      case "getItem":
-        messenger.notify("item", this.getItem((int)messagePayload), true);
-        break;
-        
-      case "saveItem":
-        putItem(item);
-        messenger.notify("saved", null, true);
-        messenger.notify("items", this.getItems(), true);
-        break;
-        
-      case "deleteItem":
-        this.deleteItem(item);
-        messenger.notify("saved", null, true);
-        messenger.notify("items", this.getItems(), true);
-        break;
-        
-      case "removeCompletedItems":
-        removeCompletedItems();
-        messenger.notify("saved");
-        messenger.notify("items", this.getItems());
-    }
-  }
-
   /**
    * Initialize the model here, subscribe to any required messages and
    * load with some initial to do list items
@@ -78,6 +39,59 @@ public class AppModel implements MessageHandler {
     messenger.subscribe("saveItem", this);
     messenger.subscribe("deleteItem", this);
     messenger.subscribe("removeCompletedItems", this);
+  }
+
+  // This method implements the messageHandler method defined in
+  // the MessageHandler interface
+  @Override
+  public void messageHandler(String messageName, Object messagePayload) {
+    // Handle messages sent from other modules
+    ToDoItem item;
+    
+    // Process the message
+    switch (messageName) {
+      // View has asked for the list of to do items
+      // Send back the items
+      case "getItems":
+        messenger.notify("items", this.getItems(), true);
+        break;
+        
+      // Somebody has asked for an individual item
+      // Find the item and send it back
+      case "getItem":
+        messenger.notify("item", this.getItem((int)messagePayload), true);
+        break;
+        
+      // Somebody wants us to save an item
+      // Grab the to do item from the payload, save or update it to the 
+      // to do list, send a confirmation message that it was saved
+      // and send the updated to do list to others
+      case "saveItem":        
+        item = (ToDoItem)messagePayload;                  
+        putItem(item);                                    
+        messenger.notify("saved", null, true);            
+        messenger.notify("items", this.getItems(), true); 
+        break;
+        
+      // Somebody wants us to delete an item
+      // Grab the to do item from the payload, delete it from
+      // to do list, send a confirmation message that it was saved
+      // and send the updated to do list to others
+      case "deleteItem":
+        item = (ToDoItem)messagePayload;                  
+        this.deleteItem(item);
+        messenger.notify("saved", null, true);
+        messenger.notify("items", this.getItems(), true);
+        break;
+        
+      // We've been told to remove all items that have their 'done' flag
+      // set.  Do it, then send a confirmation message, then send the
+      // updated to do list to others
+      case "removeCompletedItems":
+        removeCompletedItems();
+        messenger.notify("saved");
+        messenger.notify("items", this.getItems());
+    }
   }
 
   /** 
@@ -113,7 +127,6 @@ public class AppModel implements MessageHandler {
     return toDoList;
   }
   
-  // Functions to add, delete, and edit a to do item
   /** 
    * Add a new to do item to the list
    * @param item To do item to add
@@ -126,7 +139,7 @@ public class AppModel implements MessageHandler {
       toDoList.add(item);
       nextId++;
     } else {
-      // Item already exists, modify the fields
+      // Item already exists, modify the fields of the existing item
       ToDoItem storedItem = this.find(item.getId());
       storedItem.merge(item);
     }
@@ -156,12 +169,18 @@ public class AppModel implements MessageHandler {
    * Removes all completed items from the to do list
    */
   public void removeCompletedItems() {
+    // Create an empty list
     ArrayList<ToDoItem> newList = new ArrayList<>();
+    
+    // Loop through the to do list and if isDone is false
+    // add it to the new list
     for (ToDoItem item : toDoList) {
       if (!item.isDone()) {
         newList.add(item);
       }
     }
+    
+    // Clear the to do list and add the items that were not completed
     toDoList.clear();
     for (ToDoItem item : newList) {
       toDoList.add(item);

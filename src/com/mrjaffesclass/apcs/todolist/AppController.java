@@ -1,46 +1,54 @@
 package com.mrjaffesclass.apcs.todolist;
 import com.mrjaffesclass.apcs.messenger.*;
-
 /**
  * 
- * To do list controller.  We will receive messages and/or message payload
- * from the view and the model to direct the to do list to do our bidding.
- * mwahaha...
+ * To do list controller.  The controller will bootstrap the app.  "Bootstrap"
+ * means to create and load all the other classes in the app.
  *
  * @author Roger Jaffe
  * @version 1.0
  */
 public class AppController implements MessageHandler {
 
+  /**
+   * messenger: This class handles the messaging between classes
+   * mainView:  This is the class for the user interface
+   * appModel:  This is the class that contains the to do list data
+   */
   private final Messenger messenger;
-  private final MainView view;
+  private final MainView mainView;
   private final AppModel appModel;
 
   /**
    * Controller constructor The Controller is responsible for creating the MainView
-   * and the AppModel that it will be controlling. The mvcMessaging object is
-   * passed to the view and the model and is used as a local messenger
-   * between the Controller, AppModel and MainView without have direct access to the
-   * MainView and AppModel.  Remember, you want the three components separated so
-   * that one class works independently of the others.
+   * and the AppModel that it will be controlling. The messenger object is
+   * passed to the view and the model and is used as a messenger class
+   * between the Controller, AppModel and MainView without needing a persistent
+   * variable reference to the MainView and AppModel.  
+   * 
+   * Remember, to achieve "separation of concerns" you want the three 
+   * components insulated from each other so that one class works 
+   * independently of the others.
    */
   public AppController() {
-    // Create the local messaging class
+    // Create the messenger
     messenger = new Messenger();
 
-    // Create the view and set it visible
-    view = new MainView(messenger);   
-    view.init();
-    view.setVisible(true);
+    // Create and initialize the main view and set it visible
+    mainView = new MainView(messenger);   
+    mainView.init();
+    mainView.setVisible(true);
 
-    // Create the model
+    // Create and initialize the app model
     appModel = new AppModel(messenger);  
     appModel.init();    
   }
 
   /**
-   * Initialize the model here and subscribe
-   * to any required messages 
+   * Initialize the appController here
+   * Add some sample data (which we would remove if we were
+   * loading data from a source in the "cloud")
+   * Send the 'notify' message so other modules know when to start
    */
   public void init() {
     addSampleItems();
@@ -49,9 +57,7 @@ public class AppController implements MessageHandler {
 
   @Override
   public void messageHandler(String messageName, Object messagePayload) {
-    // The appController doesn't handle any messages
-    switch (messageName) {
-    }
+    // The appController doesn't need to handle any messages
   }
   
    /**
@@ -67,7 +73,7 @@ public class AppController implements MessageHandler {
       "Deposit paycheck",
     };
     
-    // Loop through the initialData and create items to add to the appModel
+    // Loop through initialData and create items to add to the appModel
     for (String description : initialData) {
       ToDoItem item = new ToDoItem(-1, description);
       appModel.putItem (item);
@@ -75,10 +81,28 @@ public class AppController implements MessageHandler {
   }
 
   /**
-   * Bootstrap the app.  The appController instantiates the model and the view
+   * Remember that all Java programs are started with the main method in one
+   * of the program's classes.
+   * 
    * @param args No arguments are necessary for this to do list application
    */
   public static void main(String[] args) {
+    String opSysName = System.getProperty("os.name").toLowerCase();
+    
+    // This will set the app title in the Mac main menu
+    if (opSysName.contains("mac")) {
+        // to set the name of the app in the Mac App menu:
+        System.setProperty("apple.awt.application.name", "My To Do List");
+        // to show the menu bar at the top of the screen:
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
+        // to show a more mac-like file dialog box
+        System.setProperty("apple.awt.fileDialogForDirectories", "true");
+        // underlying look-and-feel:
+        javax.swing.UIManager.getInstalledLookAndFeels();
+    }
+
+    // Bootstrap the app here.  The appController instantiates the model and
+    // the view. 
     AppController controller = new AppController();
     controller.init();
   }
