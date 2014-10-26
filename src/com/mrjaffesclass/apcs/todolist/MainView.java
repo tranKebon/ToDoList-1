@@ -16,6 +16,8 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
   private final int DONE_FIELD = 1;
   private final int DESCRIPTION_FIELD = 2;
   
+  private final int DONE_COLUMN = 0;
+  
   private final int DONE_FIELD_WIDTH = 65;
   private final int DESCRIPTION_FIELD_WIDTH = 475;
   private final int ROW_HEIGHT = 25;
@@ -235,7 +237,7 @@ public class MainView extends javax.swing.JFrame implements MessageHandler {
     // If the checkbox column was clicked, then we can just toggle the item's
     // done field.  If any other column was clicked we should open the editItem
     // dialog so the item can be edited.
-    if (col == ID_FIELD) {
+    if (col == DONE_COLUMN) {
       toggleDone(item);
     } else {
       editItem(item);
