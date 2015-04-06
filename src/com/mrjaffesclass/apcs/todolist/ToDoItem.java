@@ -15,15 +15,18 @@ public class ToDoItem {
   private int id;               
   private String description;
   private boolean done;
+  private String deadline;
   
   /**
    * Constructor with done set to false in constructor
    * @param _id           ID number of to do item
    * @param _description  Description of to do item
+   * @param _deadline     Date the to do item must be completed by
    */
-  public ToDoItem(int _id, String _description) {
+  public ToDoItem(int _id, String _description, String _deadline) {
     description = _description;
     id = _id;
+    deadline= _deadline;
     done = false;     // Default to not completed
   }
 
@@ -32,13 +35,21 @@ public class ToDoItem {
    * @param _id           ID number of to do item
    * @param _description  Description of to do item
    * @param _done         Done flag
+   * @param _deadline     Date the to do item must be completed by
    */
-  public ToDoItem(int _id, String _description, boolean _done) {
+  public ToDoItem(int _id, String _description, String _deadline, boolean _done) {
     description = _description;
     id = _id;
+    deadline = _deadline;
     done = _done;     // Default to not completed
   }
-
+  /**
+   * Get the deadline of the item
+   * @return deadline
+   */
+  public String getDeadline(){
+  return deadline;
+  }
   /**
    * Get the to do item description
    * @return The description of to do item
