@@ -26,7 +26,6 @@ import java.io.InputStream;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-
 /**
  * This is a big endian bit reader. It reads its bits from an InputStream.
  *
@@ -34,6 +33,7 @@ import java.io.InputStream;
  *
  */
 public class BitInputStream implements BitReader {
+
     /**
      * The number of bits remaining in the current byte.
      */
@@ -58,8 +58,7 @@ public class BitInputStream implements BitReader {
      * Make a BitReader from an InputStream. The BitReader will take bytes from
      * the InputStream and unpack them into bits.
      *
-     * @param in
-     *            An InputStream.
+     * @param in An InputStream.
      */
     public BitInputStream(InputStream in) {
         this.in = in;
@@ -75,10 +74,10 @@ public class BitInputStream implements BitReader {
     }
 
     /**
-     * Get the number of bits that have been read from this BitInputStream.
-     * This includes pad bits that have been skipped, but might not include
-     * bytes that have been read from the underlying InputStream that have not
-     * yet been delivered as bits.
+     * Get the number of bits that have been read from this BitInputStream. This
+     * includes pad bits that have been skipped, but might not include bytes
+     * that have been read from the underlying InputStream that have not yet
+     * been delivered as bits.
      *
      * @return The number of bits read so far.
      */
@@ -89,16 +88,15 @@ public class BitInputStream implements BitReader {
     /**
      * Check that the rest of the block has been padded with zeroes.
      *
-     * @param width
-     *            The size of the block to pad in bits.
-     *            This will typically be 8, 16, 32, 64, 128, 256, etc.
+     * @param width The size of the block to pad in bits. This will typically be
+     * 8, 16, 32, 64, 128, 256, etc.
      * @return true if the block was zero padded, or false if the the padding
-     *         contains any one bits.
+     * contains any one bits.
      * @throws IOException
      */
     public boolean pad(int width) throws IOException {
         boolean result = true;
-        int gap = (int)this.nrBits % width;
+        int gap = (int) this.nrBits % width;
         if (gap < 0) {
             gap += width;
         }
@@ -117,8 +115,7 @@ public class BitInputStream implements BitReader {
     /**
      * Read some bits.
      *
-     * @param width
-     *            The number of bits to read. (0..32)
+     * @param width The number of bits to read. (0..32)
      * @throws IOException
      * @return the bits
      */
@@ -142,8 +139,8 @@ public class BitInputStream implements BitReader {
             if (take > this.available) {
                 take = this.available;
             }
-            result |= ((this.unread >>> (this.available - take)) &
-                    ((1 << take) - 1)) << (width - take);
+            result |= ((this.unread >>> (this.available - take))
+                    & ((1 << take) - 1)) << (width - take);
             this.nrBits += take;
             this.available -= take;
             width -= take;

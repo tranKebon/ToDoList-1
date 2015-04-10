@@ -32,21 +32,19 @@ import org.json.Kim;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-
 /**
  * JSONzip is a binary compression scheme for JSON text.
  *
  * @author JSON.org
  * @version 2014-05-03
  */
-
 /**
- * An encoder implements the compression behavior of JSONzip. It provides a
- * zip method that takes a JSONObject or JSONArray and delivers a stream of
- * bits to a BitWriter.
+ * An encoder implements the compression behavior of JSONzip. It provides a zip
+ * method that takes a JSONObject or JSONArray and delivers a stream of bits to
+ * a BitWriter.
  *
- * FOR EVALUATION PURPOSES ONLY. THIS PACKAGE HAS NOT BEEN TESTED ADEQUATELY
- * FOR PRODUCTION USE.
+ * FOR EVALUATION PURPOSES ONLY. THIS PACKAGE HAS NOT BEEN TESTED ADEQUATELY FOR
+ * PRODUCTION USE.
  */
 public class Zipper extends JSONzip {
 
@@ -56,12 +54,10 @@ public class Zipper extends JSONzip {
     final BitWriter bitwriter;
 
     /**
-     * Create a new encoder. It may be used for an entire session or
-     * subsession.
+     * Create a new encoder. It may be used for an entire session or subsession.
      *
-     * @param bitwriter
-     *            The BitWriter this encoder will output to.
-     *            Don't forget to flush.
+     * @param bitwriter The BitWriter this encoder will output to. Don't forget
+     * to flush.
      */
     public Zipper(BitWriter bitwriter) {
         super();
@@ -70,11 +66,10 @@ public class Zipper extends JSONzip {
 
     /**
      * Return a 4 bit code for a character in a JSON number. The digits '0' to
-     * '9' get the codes 0 to 9. '.' is 10, '-' is 11, '+' is 12, and 'E' or
-     * 'e' is 13.
+     * '9' get the codes 0 to 9. '.' is 10, '-' is 11, '+' is 12, and 'E' or 'e'
+     * is 13.
      *
-     * @param digit
-     *            An ASCII character from a JSON number.
+     * @param digit An ASCII character from a JSON number.
      * @return The number code.
      */
     private static int bcd(char digit) {
@@ -82,14 +77,14 @@ public class Zipper extends JSONzip {
             return digit - '0';
         }
         switch (digit) {
-        case '.':
-            return 10;
-        case '-':
-            return 11;
-        case '+':
-            return 12;
-        default:
-            return 13;
+            case '.':
+                return 10;
+            case '-':
+                return 11;
+            case '+':
+                return 12;
+            default:
+                return 13;
         }
     }
 
@@ -115,10 +110,9 @@ public class Zipper extends JSONzip {
     /**
      * Pad the output to fill an allotment of bits.
      *
-     * @param width
-     *            The size of the bit allotment. A value of 8 will complete and
-     *            flush the current byte. If you don't pad, then some of the
-     *            last bits might not be sent to the Output Stream.
+     * @param width The size of the bit allotment. A value of 8 will complete
+     * and flush the current byte. If you don't pad, then some of the last bits
+     * might not be sent to the Output Stream.
      * @throws JSONException
      */
     public void pad(int width) throws JSONException {
@@ -132,10 +126,8 @@ public class Zipper extends JSONzip {
     /**
      * Write a number, using the number of bits necessary to hold the number.
      *
-     * @param integer
-     *            The value to be encoded.
-     * @param width
-     *            The number of bits to encode the value, between 0 and 32.
+     * @param integer The value to be encoded.
+     * @param width The number of bits to encode the value, between 0 and 32.
      * @throws JSONException
      */
     private void write(int integer, int width) throws JSONException {
@@ -153,10 +145,8 @@ public class Zipper extends JSONzip {
      * Write an integer with Huffman encoding. The bit pattern that is written
      * will be determined by the Huffman encoder.
      *
-     * @param integer
-     *            The value to be written.
-     * @param huff
-     *            The Huffman encoder.
+     * @param integer The value to be written.
+     * @param huff The Huffman encoder.
      * @throws JSONException
      */
     private void write(int integer, Huff huff) throws JSONException {
@@ -166,12 +156,9 @@ public class Zipper extends JSONzip {
     /**
      * Write each of the bytes in a kim with Huffman encoding.
      *
-     * @param kim
-     *            A kim containing the bytes to be written.
-     * @param huff
-     *            The Huffman encoder.
-     * @param ext
-     *            The Huffman encoder for the extended bytes.
+     * @param kim A kim containing the bytes to be written.
+     * @param huff The Huffman encoder.
+     * @param ext The Huffman encoder for the extended bytes.
      * @throws JSONException
      */
     private void write(Kim kim, Huff huff, Huff ext) throws JSONException {
@@ -190,10 +177,8 @@ public class Zipper extends JSONzip {
      * Write an integer, using the number of bits necessary to hold the number
      * as determined by its keep, and increment its usage count in the keep.
      *
-     * @param integer
-     *            The value to be encoded.
-     * @param keep
-     *            The Keep that the integer is one of.
+     * @param integer The value to be encoded.
+     * @param keep The Keep that the integer is one of.
      * @throws JSONException
      */
     private void write(int integer, Keep keep) throws JSONException {
@@ -217,7 +202,6 @@ public class Zipper extends JSONzip {
 // The array is empty (zipEmptyArray).
 // First value in the array is a string (zipArrayString).
 // First value in the array is not a string (zipArrayValue).
-
         boolean stringy = false;
         int length = jsonarray.length();
         if (length == 0) {
@@ -262,10 +246,9 @@ public class Zipper extends JSONzip {
     /**
      * Write a JSON value.
      *
-     * @param value
-     *            One of these types: JSONObject, JSONArray (or Map or
-     *            Collection or array), Number (or Integer or Long or Double),
-     *            or String, or Boolean, or JSONObject.NULL, or null.
+     * @param value One of these types: JSONObject, JSONArray (or Map or
+     * Collection or array), Number (or Integer or Long or Double), or String,
+     * or Boolean, or JSONObject.NULL, or null.
      * @throws JSONException
      */
     private void writeJSON(Object value) throws JSONException {
@@ -304,7 +287,6 @@ public class Zipper extends JSONzip {
 
 // If this name has already been registered, then emit its integer and
 // increment its usage count.
-
         Kim kim = new Kim(name);
         int integer = this.namekeep.find(kim);
         if (integer != none) {
@@ -313,7 +295,6 @@ public class Zipper extends JSONzip {
         } else {
 
 // Otherwise, emit the string with Huffman encoding, and register it.
-
             zero();
             write(kim, this.namehuff, this.namehuffext);
             write(end, namehuff);
@@ -331,7 +312,6 @@ public class Zipper extends JSONzip {
 
 // JSONzip has two encodings for objects: Empty Objects (zipEmptyObject) and
 // non-empty objects (zipObject).
-
         boolean first = true;
         Iterator<String> keys = jsonobject.keys();
         while (keys.hasNext()) {
@@ -373,7 +353,6 @@ public class Zipper extends JSONzip {
     private void writeString(String string) throws JSONException {
 
 // Special case for empty strings.
-
         if (string.length() == 0) {
             zero();
             write(end, this.stringhuff);
@@ -382,7 +361,6 @@ public class Zipper extends JSONzip {
 
 // Look for the string in the strings keep. If it is found, emit its
 // integer and count that as a use.
-
             int integer = this.stringkeep.find(kim);
             if (integer != none) {
                 one();
@@ -391,7 +369,6 @@ public class Zipper extends JSONzip {
 
 // But if it is not found, emit the string's characters. Register the string
 // so that a later lookup can succeed.
-
                 zero();
                 write(kim, this.stringhuff, this.stringhuffext);
                 write(end, this.stringhuff);
@@ -403,8 +380,7 @@ public class Zipper extends JSONzip {
     /**
      * Write a value.
      *
-     * @param value
-     *            One of these types: Boolean, Number, etc.
+     * @param value One of these types: Boolean, Number, etc.
      * @throws JSONException
      */
     private void writeValue(Object value) throws JSONException {
@@ -428,11 +404,11 @@ public class Zipper extends JSONzip {
                     one();
                     if (longer < int7) {
                         zero();
-                        write((int)(longer - int4), 7);
+                        write((int) (longer - int4), 7);
                         return;
                     }
                     one();
-                    write((int)(longer - int7), 14);
+                    write((int) (longer - int7), 14);
                     return;
                 }
             }

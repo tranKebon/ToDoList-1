@@ -27,7 +27,6 @@ import org.json.Kim;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-
 /**
  * A keep is a data structure that associates strings (or substrings) with
  * numbers. This allows the sending of small integers instead of strings.
@@ -36,6 +35,7 @@ import org.json.Kim;
  * @version 2013-05-03
  */
 class Keep implements None, PostMortem {
+
     private int capacity;
     protected int length;
     private Object[] list;
@@ -50,13 +50,12 @@ class Keep implements None, PostMortem {
         this.ticks = new long[this.capacity];
         this.list = new Object[this.capacity];
         this.map = new HashMap<Object, Integer>(this.capacity);
-   }
+    }
 
     /**
      * When an item ages, its use count is reduced by at least half.
      *
-     * @param ticks
-     *            The current use count of an item.
+     * @param ticks The current use count of an item.
      * @return The new use count for that item.
      */
     public static long age(long ticks) {
@@ -83,8 +82,8 @@ class Keep implements None, PostMortem {
     }
 
     /**
-     * Compact the keep. A keep may contain at most this.capacity elements.
-     * The keep contents can be reduced by deleting all elements with low use
+     * Compact the keep. A keep may contain at most this.capacity elements. The
+     * keep contents can be reduced by deleting all elements with low use
      * counts, and by reducing the use counts of the survivors.
      */
     private void compact() {
@@ -116,8 +115,7 @@ class Keep implements None, PostMortem {
      * Find the integer value associated with this key, or nothing if this key
      * is not in the keep.
      *
-     * @param key
-     *            An object.
+     * @param key An object.
      * @return An integer
      */
     public int find(Object key) {
@@ -159,6 +157,7 @@ class Keep implements None, PostMortem {
     /**
      * Register a value in the keep. Compact the keep if it is full. The next
      * time this value is encountered, its integer can be sent instead.
+     *
      * @param value A value.
      */
     public void register(Object value) {
@@ -182,6 +181,7 @@ class Keep implements None, PostMortem {
 
     /**
      * Return the value associated with the integer.
+     *
      * @param integer The number of an item in the keep.
      * @return The value.
      */

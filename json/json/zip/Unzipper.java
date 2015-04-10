@@ -28,14 +28,12 @@ import org.json.Kim;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-
 /**
  * JSONzip is a binary compression scheme for JSON text.
  *
  * @author JSON.org
  * @version 2014-05-03
  */
-
 public class Unzipper extends JSONzip {
 
     /**
@@ -47,8 +45,7 @@ public class Unzipper extends JSONzip {
      * Create a new unzipper. It may be used for an entire session or
      * subsession.
      *
-     * @param bitreader
-     *            The bitreader that this decoder will read from.
+     * @param bitreader The bitreader that this decoder will read from.
      */
     public Unzipper(BitReader bitreader) {
         super();
@@ -123,8 +120,7 @@ public class Unzipper extends JSONzip {
     /**
      * Read an integer, specifying its width in bits.
      *
-     * @param width
-     *            0 to 32.
+     * @param width 0 to 32.
      * @return An unsigned integer.
      * @throws JSONException
      */
@@ -142,6 +138,7 @@ public class Unzipper extends JSONzip {
 
     /**
      * Read Huffman encoded characters into a keep.
+     *
      * @param huff A Huffman decoder.
      * @param ext A Huffman decoder for the extended bytes.
      * @param keep The keep that will receive the kim.
@@ -184,8 +181,7 @@ public class Unzipper extends JSONzip {
     /**
      * Read a JSONArray.
      *
-     * @param stringy
-     *            true if the first element is a string.
+     * @param stringy true if the first element is a string.
      * @throws JSONException
      */
     private JSONArray readArray(boolean stringy) throws JSONException {
@@ -222,22 +218,22 @@ public class Unzipper extends JSONzip {
      */
     private Object readJSON() throws JSONException {
         switch (read(3)) {
-        case zipObject:
-            return readObject();
-        case zipArrayString:
-            return readArray(true);
-        case zipArrayValue:
-            return readArray(false);
-        case zipEmptyObject:
-            return new JSONObject();
-        case zipEmptyArray:
-            return new JSONArray();
-        case zipTrue:
-            return Boolean.TRUE;
-        case zipFalse:
-            return Boolean.FALSE;
-        default:
-            return JSONObject.NULL;
+            case zipObject:
+                return readObject();
+            case zipArrayString:
+                return readArray(true);
+            case zipArrayValue:
+                return readArray(false);
+            case zipEmptyObject:
+                return new JSONObject();
+            case zipEmptyArray:
+                return new JSONArray();
+            case zipTrue:
+                return Boolean.TRUE;
+            case zipFalse:
+                return Boolean.FALSE;
+            default:
+                return JSONObject.NULL;
         }
     }
 
@@ -262,44 +258,44 @@ public class Unzipper extends JSONzip {
 
     private Object readValue() throws JSONException {
         switch (read(2)) {
-        case 0:
-            int nr_bits = !bit() ? 4 : !bit() ? 7 : 14;
-            int integer = read(nr_bits);
-            switch (nr_bits) {
-            case 7:
-                integer += int4;
-                break;
-            case 14:
-                integer += int7;
-                break;
-            }
-            return integer;
-        case 1:
-            byte[] bytes = new byte[256];
-            int length = 0;
-            while (true) {
-                int c = read(4);
-                if (c == endOfNumber) {
-                    break;
+            case 0:
+                int nr_bits = !bit() ? 4 : !bit() ? 7 : 14;
+                int integer = read(nr_bits);
+                switch (nr_bits) {
+                    case 7:
+                        integer += int4;
+                        break;
+                    case 14:
+                        integer += int7;
+                        break;
                 }
-                bytes[length] = bcd[c];
-                length += 1;
-            }
-            Object value;
-            try {
-                value = JSONObject.stringToValue(new String(bytes, 0, length,
-                        "US-ASCII"));
-            } catch (java.io.UnsupportedEncodingException e) {
-                throw new JSONException(e);
-            }
-            this.valuekeep.register(value);
-            return value;
-        case 2:
-            return getAndTick(this.valuekeep, this.bitreader);
-        case 3:
-            return readJSON();
-        default:
-            throw new JSONException("Impossible.");
+                return integer;
+            case 1:
+                byte[] bytes = new byte[256];
+                int length = 0;
+                while (true) {
+                    int c = read(4);
+                    if (c == endOfNumber) {
+                        break;
+                    }
+                    bytes[length] = bcd[c];
+                    length += 1;
+                }
+                Object value;
+                try {
+                    value = JSONObject.stringToValue(new String(bytes, 0, length,
+                            "US-ASCII"));
+                } catch (java.io.UnsupportedEncodingException e) {
+                    throw new JSONException(e);
+                }
+                this.valuekeep.register(value);
+                return value;
+            case 2:
+                return getAndTick(this.valuekeep, this.bitreader);
+            case 3:
+                return readJSON();
+            default:
+                throw new JSONException("Impossible.");
         }
     }
 

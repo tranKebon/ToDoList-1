@@ -26,7 +26,6 @@ import java.io.OutputStream;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-
 /**
  * This is a big endian bit writer. It writes its bits to an OutputStream.
  *
@@ -59,8 +58,7 @@ public class BitOutputStream implements BitWriter {
      * Use an OutputStream to produce a BitWriter. The BitWriter will send its
      * bits to the OutputStream as each byte is filled.
      *
-     * @param out
-     *            An Output Stream
+     * @param out An Output Stream
      */
     public BitOutputStream(OutputStream out) {
         this.out = out;
@@ -68,8 +66,8 @@ public class BitOutputStream implements BitWriter {
 
     /**
      * Returns the number of bits that have been written to this
-     * bitOutputStream. This may include bits that have not yet been written
-     * to the underlying outputStream.
+     * bitOutputStream. This may include bits that have not yet been written to
+     * the underlying outputStream.
      */
     public long nrBits() {
         return this.nrBits;
@@ -88,13 +86,12 @@ public class BitOutputStream implements BitWriter {
      * Pad the rest of the block with zeros and flush. pad(8) flushes the last
      * unfinished byte. The underlying OutputStream will be flushed.
      *
-     * @param width
-     *            The size of the block to pad in bits.
-     *            This will typically be 8, 16, 32, 64, 128, 256, etc.
+     * @param width The size of the block to pad in bits. This will typically be
+     * 8, 16, 32, 64, 128, 256, etc.
      * @throws IOException
      */
     public void pad(int width) throws IOException {
-        int gap = (int)this.nrBits % width;
+        int gap = (int) this.nrBits % width;
         if (gap < 0) {
             gap += width;
         }
@@ -111,10 +108,8 @@ public class BitOutputStream implements BitWriter {
     /**
      * Write some bits. Up to 32 bits can be written at a time.
      *
-     * @param bits
-     *            The bits to be written.
-     * @param width
-     *            The number of bits to write. (0..32)
+     * @param bits The bits to be written.
+     * @param width The number of bits to write. (0..32)
      * @throws IOException
      */
     public void write(int bits, int width) throws IOException {
@@ -129,8 +124,8 @@ public class BitOutputStream implements BitWriter {
             if (actual > this.vacant) {
                 actual = this.vacant;
             }
-            this.unwritten |= ((bits >>> (width - actual)) &
-                    ((1 << actual) - 1)) << (this.vacant - actual);
+            this.unwritten |= ((bits >>> (width - actual))
+                    & ((1 << actual) - 1)) << (this.vacant - actual);
             width -= actual;
             nrBits += actual;
             this.vacant -= actual;

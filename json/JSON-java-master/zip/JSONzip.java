@@ -23,30 +23,29 @@ package org.json.zip;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-
 /**
  * JSONzip is a binary-encoded JSON dialect. It is designed to compress the
  * messages in a session in bandwidth constrained applications, such as mobile.
  *
  * JSONzip is adaptive, so with each message seen, it should improve its
- * compression. It minimizes JSON's overhead, reducing punctuation
- * to a small number of bits. It uses Huffman encoding to reduce the average
- * size of characters. It uses caches (or Keeps) to keep recently seen strings
- * and values, so repetitive content (such as object keys) can be
- * substantially reduced. It uses a character encoding called Kim (Keep it
- * minimal) that is smaller than UTF-8 for most East European, African, and
- * Asian scripts.
+ * compression. It minimizes JSON's overhead, reducing punctuation to a small
+ * number of bits. It uses Huffman encoding to reduce the average size of
+ * characters. It uses caches (or Keeps) to keep recently seen strings and
+ * values, so repetitive content (such as object keys) can be substantially
+ * reduced. It uses a character encoding called Kim (Keep it minimal) that is
+ * smaller than UTF-8 for most East European, African, and Asian scripts.
  *
  * JSONzip tends to reduce most content by about half. If there is a lot of
  * recurring information, the reduction can be much more dramatic.
  *
- * FOR EVALUATION PURPOSES ONLY. THIS PACKAGE HAS NOT YET BEEN TESTED
- * ADEQUATELY FOR PRODUCTION USE.
+ * FOR EVALUATION PURPOSES ONLY. THIS PACKAGE HAS NOT YET BEEN TESTED ADEQUATELY
+ * FOR PRODUCTION USE.
  *
  * @author JSON.org
  * @version 2014-05-20
  */
 public abstract class JSONzip implements None, PostMortem {
+
     /**
      * The characters in JSON numbers can be reduced to 4 bits each.
      */
@@ -199,8 +198,8 @@ public abstract class JSONzip implements None, PostMortem {
     }
 
     /**
-     * Write two integers, separated by ':' to the console.
-     * The second integer is suppressed if it is 1.
+     * Write two integers, separated by ':' to the console. The second integer
+     * is suppressed if it is 1.
      *
      * @param integer The integer to write to the log.
      * @param width The width of the integer in bits.

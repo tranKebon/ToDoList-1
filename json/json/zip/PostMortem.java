@@ -23,7 +23,6 @@ package zip;
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
  */
-
 /**
  * The PostMortem interface allows for testing the internal state of JSONzip
  * processors. Testing that JSONzip can compress an object and reproduce a
@@ -36,11 +35,11 @@ package zip;
  * encapsulation.
  */
 public interface PostMortem {
+
     /**
      * Determine if two objects are equivalent.
      *
-     * @param pm
-     *            Another object of the same type.
+     * @param pm Another object of the same type.
      * @return true if they match.
      */
     public boolean postMortem(PostMortem pm);
