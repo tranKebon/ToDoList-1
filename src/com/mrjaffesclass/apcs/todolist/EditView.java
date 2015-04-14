@@ -146,6 +146,12 @@ public class EditView extends javax.swing.JDialog implements MessageHandler {
             }
         });
 
+        datePicker.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                datePickerActionPerformed(evt);
+            }
+        });
+
         dateLabel.setText("Date");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -221,6 +227,10 @@ public class EditView extends javax.swing.JDialog implements MessageHandler {
   private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
       itemAction("delete");
   }//GEN-LAST:event_deleteBtnActionPerformed
+
+    private void datePickerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_datePickerActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_datePickerActionPerformed
 
     /**
      * @param args the command line arguments
